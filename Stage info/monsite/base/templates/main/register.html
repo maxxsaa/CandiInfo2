@@ -1,0 +1,169 @@
+{% extends 'main/main.html' %}
+
+{% block content %}
+<style>
+    .container-sm {
+        width: 50%;
+        margin-top: 0vh;
+        margin-bottom: 0vh;
+    }
+
+    .flex {
+        display: flex;  
+        justify-content: space-between;  
+        margin-top: 10px;
+    }
+
+    .box {
+        margin-right: 10%;
+    }
+
+    .card {
+        background: linear-gradient(5deg, #ff9a9e, #fad0c4);
+    }
+
+    .logo {
+        color:darkred;
+    }
+
+    .input-group-text {
+        background: linear-gradient(5deg, #ff9a9e, #fad0c4);
+    }
+</style>
+
+<div class="container-sm mt-3">
+    <div class="h1 text-center mb-3 logo">Findeur</div>
+    <div class="card p-4 mb-4">
+        <h3 class="card-title mb-3 text-center ">Créer un compte</h3>
+        <p class="card-text mb-4  text-center">Nous avons besoin de quelques informations pour créer ton compte.</p>
+
+        <form class="row g-3 needs-validation" novalidate method="POST">
+            {% csrf_token %}
+            <div class="col-md-4">
+                <label for="validationCustom01" class="form-label">Prénom</label>
+                <input type="text" name="firstname" class="form-control custom" id="validationCustom01" placeholder="Prénom" required>
+                <div class="valid-feedback">
+                    C'est bon!
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label for="validationCustom02" class="form-label">Nom de famille</label>
+                <input type="text" name="lastname" class="form-control custom" id="validationCustom02" placeholder="Nom de famille" required>
+                <div class="valid-feedback">
+                    C'est bon!
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label for="validationCustomUsername" class="form-label">Nom d'utilisateur</label>
+                <div class="input-group has-validation">
+                    <span class="input-group-text " id="inputGroupPrepend">@</span>
+                    <input type="text" name="username" class="form-control custom" id="validationCustomUsername" aria-describedby="inputGroupPrepend" required>
+                    <div class="invalid-feedback">
+                        Tu dois choisir un nom d'utilisateur.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 position-relative">
+                <label for="validationTooltip05" class="form-label">Mot de passe</label>
+                <input type="password" name="password" class="form-control custom" id="validationTooltip05" required>
+                <div class="invalid-tooltip">
+                    Tu dois choisir un mot de passe.
+                </div>
+            </div>
+            <div class="col-md-6">
+                <label for="validationCustom03" class="form-label">E-mail</label>
+                <input type="email" name="email" class="form-control custom" id="validationCustom03" required placeholder="Votre adresse e-mail">
+                <div class="invalid-feedback">
+                    Tu dois compléter ton adresse e-mail.
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <label for="gender" class="form-label">Genre</label>
+                <select name="gender" id="gender" class="form-select " required>
+                    <option value="">Choisis un genre</option>
+                    <option value="Homme">Homme</option>
+                    <option value="Femme">Femme</option>
+                    <option value="Autre">Autre</option>
+                </select>
+                <div class="invalid-feedback">
+                    Veuillez choisir un genre.
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <label for="interet" class="form-label">Intérêt</label>
+                <select name="interet" id="interet" class="form-select " required>
+                    <option value="">Choisis un intérêt</option>
+                    <option value="Homme">Homme</option>
+                    <option value="Femme">Femme</option>
+                    <option value="Both">Peu importe</option>
+                </select>
+                <div class="invalid-feedback">
+                    Veuillez choisir un intérêt.
+                </div>
+            </div>
+
+<div class="flex">
+            <div class="col-md-3 position-relative " >
+                <label for="validationTooltip05" class="form-label">Latitude</label>
+                <input type="number" step="any" name="latitude" class="form-control custom" id="validationTooltip05" required inputmode="numeric" min="-90" max="90">
+
+                <div class="invalid-tooltip">
+                    Tu dois choisir une latitude.
+                </div>
+            </div>
+
+            <div class="col-md-3 position-relative">
+                <label for="validationTooltip05" class="form-label">Longitude</label>
+                <input type="number" step="any" name="longitude" class="form-control custom" id="validationTooltip05" required inputmode="numeric" min="-90" max="90">
+                <div class="invalid-tooltip">
+                    Tu dois choisir une longitude.
+                </div>
+            </div>
+            <div class="col-md-3 position-relative">
+                <label for="validationTooltip05" class="form-label">Age</label>
+                <input type="number" step="any" name="age" class="form-control custom" id="validationTooltip05" required inputmode="numeric" min="18" max="99">
+                <div class="invalid-tooltip">
+                    Tu dois choisir un âge (entre 18 et 99 ans).
+                </div>
+            </div>
+</div>
+
+
+            <div class="col-12 text-center">
+                <button class="btn btn-danger" type="submit">Créer mon compte</button>
+            </div>
+        </form>
+    </div>
+
+    
+</div>
+<div class="container-sm">
+    <!-- Login Link -->
+    <div class="card p-4 text-center">
+        <p class="mb-3">Si vous avez déjà un compte, connectez-vous ici :</p>
+        <a href="/login" class="btn btn-danger">Se connecter</a>
+    </div>
+</div>
+
+
+<script>
+    (() => {
+        'use strict'
+
+        const forms = document.querySelectorAll('.needs-validation')
+
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}

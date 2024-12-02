@@ -1,0 +1,93 @@
+{% extends 'main/main.html' %}
+{% load static %}
+{% block content %}
+<style>
+    .card {
+      border-radius: 15px;
+      
+    }
+    .card-img-top {
+        border-radius: 50%;
+        width: 70%;
+        height: auto; /* Conserver l'aspect ratio de l'image */
+        margin: 0 auto; /* Centrer l'image horizontalement */
+        display: block; /* L'image devient un élément de type bloc pour permettre le centrage */
+        }
+
+    .card-body {
+      background-color: #f8f9fa;
+      padding: 20px;
+    }
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .card-text {
+      font-size: 1rem;
+      color: #555;
+    }
+    .btn {
+      width: 100%;
+    }
+
+    .box {
+      background-color: #ff9a9e;
+    }
+  </style>
+  <div class="container mt-5 ">
+    <div class="row justify-content-center">
+
+      <div class="col-md-6 col-lg-4 ">
+        <div class="card shadow-lg box ">
+            {% if user.image %}
+          <img src="{{ request.user.image.url }}" alt="Profile Image" class="card-img-top rounded-circle" style="object-fit: cover; height: 300px;">
+            {% else %}
+            <img src="{% static 'images/Neutral.png' %}" alt="Image par défaut" class="card-img-top fixed-image">
+            {% endif %}
+          <div class="card-body text-center box ">
+            <h3 class="card-title">{{ request.user.first_name }} </h3>
+
+            <form id="editProfileForm" method="POST" action="{% url 'update_profile' %}" style="display:none;">
+              {% csrf_token %}
+              <div class="mb-3">
+                <label for="gender" class="form-label">Age</label>
+                <input type="text" class="form-control" id="age" name="age" value="{{ request.user.age }}">
+              </div>
+              <div class="mb-3">
+                <label for="gender" class="form-label">Genre</label>
+                <input type="text" class="form-control" id="gender" name="gender" value="{{ request.user.gender }}">
+              </div>
+              <div class="mb-3">
+                <label for="interet" class="form-label">Intérêts</label>
+                <input type="text" class="form-control" id="interet" name="interet" value="{{ request.user.interet }}">
+              </div>
+              <button type="submit" class="btn btn-primary">Sauvegarder</button>
+            </form>
+
+            <div id="profileInfo">
+              <p><strong>Age:</strong> {{ request.user.age }}</p>
+              <p><strong>Genre:</strong> {{ request.user.gender }}</p>
+              <p><strong>Intérêt:</strong> 
+                {% if request.user.interet == 'Both' %}
+                Peu importe
+                {% else %}
+                {{ request.user.interet }}</p>
+                {% endif %}
+            </div>
+
+            <button id="editProfileBtn" class="btn btn-danger mt-3">Modifier le profil</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    document.getElementById('editProfileBtn').addEventListener('click', function() {
+      document.getElementById('profileInfo').style.display = 'none';
+      document.getElementById('editProfileForm').style.display = 'block';
+      document.getElementById('editProfileBtn').style.display = 'none';
+    });
+  </script>
+{% endblock %}

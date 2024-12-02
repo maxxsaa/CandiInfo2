@@ -1,0 +1,244 @@
+{% extends 'main/main.html' %}
+
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Rencontre</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                color: #333;
+                
+            }
+    
+            .page-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 90vh;
+                width: 100%;
+                text-align: center;
+                position: relative;
+                
+            }
+    
+            .main-text {
+                font-size: 24px;
+                font-weight: bold;
+                color: #fff;
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+                margin-bottom: 20px;
+            }
+    
+            .swipe-hint {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+                max-width: 400px;
+                margin-bottom: 20px;
+            }
+    
+            .swipe-hint span {
+                font-size: 30px;
+                color: #fff;
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+            }
+    
+         
+            .card-container {
+                position: relative;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 300px;
+                height: 450px;
+            }
+    
+   
+            .card {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                background-color: #ffffff;
+                border-radius: 20px;
+                box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+                overflow: hidden;
+                cursor: grab;
+                transition: transform 0.2s ease-in-out;
+            }
+    
+            .card:hover {
+                transform: scale(1.05);
+            }
+    
+            .card-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                pointer-events: none;
+            }
+    
+            .card-info {
+                position: absolute;
+                bottom: 20px;
+                width: 100%;
+                text-align: center;
+                color: white;
+                font-size: 28px;
+                font-weight: bold;
+                text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+                z-index: 10;
+            }
+    
+            .helper-text {
+                font-size: 14px;
+                color: #fff;
+                margin-top: 15px;
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="alert-container"></div>
+        <div class="page-container">
+            <div class="main-text">Swipez pour trouver votre âme sœur ❤️</div>
+            
+            <div class="swipe-hint">
+                <span> ⬅️ Ca dégage</span>
+                <span>Je kiffe ➡️</span>
+            </div>
+    
+            <div class="card-container" data-emitter-id="{{ user.id }}">
+                <div class="card" id="card">
+                    <img src="{{ nearby_users.0.image.url }}" alt="User Image" class="card-image" id="cardImage">
+                    
+                    <div class="card-info">{{ nearby_users.0.first_name }}, {{ nearby_users.0.age }} ans</div>
+                </div>
+            </div>
+    
+            <div class="helper-text">Trouvez quelqu'un qui fait battre votre cœur 💓</div>
+        </div>
+    </body>
+    </html>
+    
+
+
+
+
+<script>
+    const nearbyUsers = JSON.parse('{{ nearby_users_json|safe }}');
+    const cardContainer = document.querySelector('.card-container');
+    const emitterId = cardContainer.getAttribute('data-emitter-id');
+    let currentIndex = 0;
+
+    function displayUser(index) {
+        if (index >= nearbyUsers.length) {
+            cardContainer.innerHTML = "<p class=card-container>Plus personne de disponible !</p>";
+            return;
+        }
+
+        const user = nearbyUsers[index];
+        const cardHTML = `
+            <div class="card" id="card">
+                <img src="${user.image_url}" alt="User Image" class="card-image">
+                <div class="card-info">${user.first_name}, ${user.age}</div>
+            </div>
+        `;
+        cardContainer.innerHTML = cardHTML;
+        setupCardEvents();
+    }
+
+    function sendSwipe(isLike) {
+        fetch('/create_note/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                emitter_id: emitterId,
+                receiver_id: nearbyUsers[currentIndex].id,
+                is_like: isLike
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success' && data.match) {
+                showMatchMessage("C'est un match !");
+                console.log('match')
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+    }
+
+    function showMatchMessage(message) {
+
+        const alertContainer = document.getElementById('alert-container');
+        const matchMessage = document.createElement('div');
+        matchMessage.classList.add('alert', 'alert-danger', 'alert-dismissible', 'fade', 'show');
+        matchMessage.setAttribute('role', 'alert');
+        matchMessage.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        alertContainer.appendChild(matchMessage);
+        matchMessage.addEventListener('closed.bs.alert', () => matchMessage.remove());
+    }
+
+    function setupCardEvents() {
+        const card = document.getElementById('card');
+        let isDragging = false;
+        let startX, currentX, rotation;
+
+        card.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX - card.offsetLeft;
+            card.style.transition = 'none';
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            currentX = e.clientX - startX;
+            rotation = currentX / 10;
+            card.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            card.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
+
+            if (Math.abs(rotation) > 10) {
+                const isLike = rotation > 0;
+                sendSwipe(isLike);
+
+                card.classList.add('fade-out');
+                card.style.transform = isLike
+                    ? 'translateX(500px) rotate(30deg)'
+                    : 'translateX(-500px) rotate(-30deg)';
+
+                setTimeout(() => {
+                    currentIndex++;
+                    displayUser(currentIndex);
+                }, 200);
+            } else {
+                card.style.transform = 'translateX(0px) rotate(0deg)';
+            }
+        });
+    }
+
+    displayUser(currentIndex);
+</script>
+
+{% endblock %}
